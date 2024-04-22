@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/tuhis/ruuvi-saver/pkg/config"
+	"github.com/tuhis/ruuvi-saver/pkg/tsdb"
 	"go.uber.org/zap"
 )
 
@@ -31,6 +32,12 @@ func main() {
 		os.Exit(1)
 	}()
 
+	// Create TSDBWriter
+	tsdbWriter := tsdb.InfluxDBWriter{
+		InfluxDBRepository: config,
+		Logger:             logger.Sugar(),
+	}
+
 	// Sleep 10 seconds and print owner of gateway with ID "1"
 	logger.Info("Sleeping for 10 seconds")
 	time.Sleep(10 * time.Second)
@@ -49,4 +56,10 @@ func main() {
 
 	logger.Info("InfluxDB config for tenant with ID 123", zap.Any("config", configResult))
 
+	// Write a measurement to InfluxDB
+	logger.Info("Writing measurement to InfluxDB")
+	err = tsdbWriter.WriteMeasurement("123", "temperature", map[string]string{"location": "living-room"}, map[string]interface{}{"value": 22.5})
+	if err != nil {
+		logger.Error("Failed to write measurement", zap.Error(err))
+	}
 }

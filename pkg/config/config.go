@@ -13,6 +13,10 @@ type GatewayRepository interface {
 	GetInfluxDBConfig(tenantID string) (InfluxDBConfig, error)
 }
 
+type InfluxDBRepository interface {
+	GetInfluxDBConfig(tenantID string) (InfluxDBConfig, error)
+}
+
 type Gateway struct {
 	ID         string
 	Owner      string
@@ -28,8 +32,11 @@ type GatewayKafkaMessage struct {
 type InfluxDBConfig struct {
 	Host        string
 	AccessToken string
+	Username    string
+	Password    string
 	Org         string
 	Bucket      string
+	Database    string
 	TenantID    string
 	UpdatedAt   int
 }
@@ -37,8 +44,11 @@ type InfluxDBConfig struct {
 type InfluxDBConfigKafkaMessage struct {
 	Host        string `json:"host"`
 	AccessToken string `json:"access_token"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
 	Org         string `json:"org"`
 	Bucket      string `json:"bucket"`
+	Database    string `json:"database"`
 	TenantID    string `json:"tenant_id"`
 	UpdatedAt   int    `json:"updated_at"`
 }

@@ -33,7 +33,7 @@
 
 # IDE specific files
 .idea/
-.vscode/
+# .vscode/
 *.sublime-workspace
 
 # OS specific files

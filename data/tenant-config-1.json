@@ -1,1 +1,1 @@
-{ "host": "localhost", "access_token": "your_access_token", "org": "your_org", "bucket": "your_bucket", "tenant_id": "123", "updated_at": 1666337696, "fake_field": "fake_value", "buuhuu": 1234 }
+{ "host": "http://localhost:8086", "access_token": "your_access_token", "username": "v1user", "password": "v1password", "org": "your_org", "bucket": "iot-sensor-data", "database": "your_bucket", "tenant_id": "123", "updated_at": 1666337696, "fake_field": "fake_value", "buuhuu": 1234 }

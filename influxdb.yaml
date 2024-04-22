@@ -7,7 +7,8 @@ services:
     image: influxdb:2.7.6-alpine
     ports:
       - 8086:8086
-    # volumes:
+    volumes:
+      - ./influxdb/scripts:/docker-entrypoint-initdb.d
     #   - ./influxdb/config:/etc/influxdb2
     environment:
       DOCKER_INFLUXDB_INIT_MODE: setup
@@ -15,3 +16,7 @@ services:
       DOCKER_INFLUXDB_INIT_PASSWORD: adminpassword
       DOCKER_INFLUXDB_INIT_ORG: test-org
       DOCKER_INFLUXDB_INIT_BUCKET: iot-sensor-data
+      V1_AUTH_USERNAME: v1user
+      V1_AUTH_PASSWORD: v1password
+      V1_DB_NAME: iot-sensor-data
+      V1_RP_NAME: v1-rp

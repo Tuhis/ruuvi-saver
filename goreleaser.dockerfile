@@ -1,0 +1,5 @@
+FROM gcr.io/distroless/static:nonroot
+COPY ruuvi-saver /
+USER 65532:65532
+
+ENTRYPOINT ["/ruuvi-saver"]

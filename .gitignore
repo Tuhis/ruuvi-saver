@@ -1,0 +1,44 @@
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Executables
+*.exe
+*.out
+/ruuvi-saver
+!cmd/ruuvi-saver
+
+# Go binary
+/bin/
+
+# Go test cache
+/.cache/
+
+# Go build cache
+/.build/
+
+# Go coverage profile
+*.coverprofile
+
+# Go module cache
+/.go/
+
+# Go generated files
+*.pb.go
+*.pb.gw.go
+
+# Go vendor directory
+/vendor/
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-workspace
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Env file
+.env

@@ -306,8 +306,11 @@ func updateInfluxDBConfigs(influxDbConfigs map[string]InfluxDBConfig, msgChan <-
 				influxDbConfigs[msg.TenantID] = InfluxDBConfig{
 					Host:        msg.Host,
 					AccessToken: msg.AccessToken,
+					Username:    msg.Username,
+					Password:    msg.Password,
 					Org:         msg.Org,
 					Bucket:      msg.Bucket,
+					Database:    msg.Database,
 					TenantID:    msg.TenantID,
 					UpdatedAt:   msg.UpdatedAt,
 				}
@@ -316,8 +319,11 @@ func updateInfluxDBConfigs(influxDbConfigs map[string]InfluxDBConfig, msgChan <-
 			influxDbConfigs[msg.TenantID] = InfluxDBConfig{
 				Host:        msg.Host,
 				AccessToken: msg.AccessToken,
+				Username:    msg.Username,
+				Password:    msg.Password,
 				Org:         msg.Org,
 				Bucket:      msg.Bucket,
+				Database:    msg.Database,
 				TenantID:    msg.TenantID,
 				UpdatedAt:   msg.UpdatedAt,
 			}

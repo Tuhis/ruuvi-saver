@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/segmentio/kafka-go"
+	"github.com/tuhis/ruuvi-saver/internal"
 	"github.com/tuhis/ruuvi-saver/pkg/config"
 	"github.com/tuhis/ruuvi-saver/pkg/tsdb"
 	"go.uber.org/zap"
@@ -16,6 +19,9 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
+	// Main context
+	ctx, cancel := context.WithCancel(context.Background())
+
 	// Init logger
 	logger, _ := zap.NewProduction()
 
@@ -24,42 +30,40 @@ func main() {
 	// Init config
 	config := config.New(logger.Sugar())
 
+	// Create TSDBWriter
+	tsdbWriter := tsdb.InfluxDBWriter{
+		InfluxDBRepository:        config,
+		GatewayRepository:         config,
+		DeviceLocationReposistory: config,
+		Logger:                    logger.Sugar(),
+	}
+
+	// Create RuuviConsumer
+	consumerCtx, consumerCancel := context.WithCancel(ctx)
+	ruuviConsumer := internal.RuuviConsumer{
+		Logger:    logger.Sugar(),
+		MsgChan:   make(chan kafka.Message, 10), // TODO: Increase buffer size after some testing
+		ReaderCtx: consumerCtx,
+		CtxCancel: consumerCancel,
+	}
+
 	// Signal handler, cleanup and exit
 	go func() {
 		<-c
 		logger.Info("Shutting down")
 		config.Close()
+		ruuviConsumer.Stop()
+		cancel()
 		os.Exit(1)
 	}()
-
-	// Create TSDBWriter
-	tsdbWriter := tsdb.InfluxDBWriter{
-		InfluxDBRepository: config,
-		Logger:             logger.Sugar(),
-	}
 
 	// Sleep 10 seconds and print owner of gateway with ID "1"
 	logger.Info("Sleeping for 10 seconds")
 	time.Sleep(10 * time.Second)
-	owner, err := config.GetGatewayOwner("1")
-	if err != nil {
-		logger.Error("Failed to get gateway owner", zap.Error(err))
-	}
 
-	logger.Info("Gateway owner", zap.String("owner", owner))
+	// Start main consumer
+	ruuviConsumer.Start()
 
-	// Print InfluxDB config for tenant with ID "123"
-	configResult, err := config.GetInfluxDBConfig("123")
-	if err != nil {
-		logger.Error("Failed to get InfluxDB config", zap.Error(err))
-	}
-
-	logger.Info("InfluxDB config for tenant with ID 123", zap.Any("config", configResult))
-
-	// Write a measurement to InfluxDB
-	logger.Info("Writing measurement to InfluxDB")
-	err = tsdbWriter.WriteMeasurement("123", "temperature", map[string]string{"location": "living-room"}, map[string]interface{}{"value": 22.5})
-	if err != nil {
-		logger.Error("Failed to write measurement", zap.Error(err))
-	}
+	// Start processing of the messages
+	tsdbWriter.WriteMeasurementsFromKafkaMessageChannel(ctx, ruuviConsumer.MsgChan)
 }

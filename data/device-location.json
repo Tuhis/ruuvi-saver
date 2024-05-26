@@ -1,0 +1,5 @@
+{ "tenant_id": "123", "device_id": "D3:2A:35:A8:4D:6B", "location_name": "Living Room3", "valid_from": 1638451220 }
+{ "tenant_id": "123", "device_id": "D3:2A:35:A8:4D:6B", "location_name": "Living Room2", "valid_from": 1638451120 }
+{ "tenant_id": "123", "device_id": "D3:2A:35:A8:4D:6B", "location_name": "Living Room4", "valid_from": 1638451320 }
+{ "tenant_id": "123", "device_id": "D3:2A:35:A8:4D:6B", "location_name": "Living Room1", "valid_from": 1638451020 }
+{ "tenant_id": "123", "device_id": "D3:2A:35:A8:4D:6B", "location_name": "Living Room5", "valid_from": 1638452020 }

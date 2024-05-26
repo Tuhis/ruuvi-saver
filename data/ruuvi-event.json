@@ -1,0 +1,1 @@
+{ "type": "new_measurement", "data": { "DataFormat": 5, "Temperature": 21.77, "Humidity": 39.565, "Pressure": 96948, "Acceleration": { "X": 20, "Y": -40, "Z": 988 }, "Battery": 2893, "TXPower": 4, "Movement": 2, "Sequence": 44588, "MAC": "D3:2A:35:A8:4D:6B", "RSSI": -68, "Address": "5fb76bda-bbf5-5bfd-c950-c5dbdb7b55e8", "LocalName": "" }, "source_uuid": "unknown" }

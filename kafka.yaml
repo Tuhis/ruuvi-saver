@@ -71,6 +71,10 @@ services:
                cub kafka-ready -b kafka0:29092 1 30 && \
                kafka-topics --create --topic ruuvi-gateway-repository --partitions 3 --replication-factor 1 --if-not-exists --bootstrap-server kafka0:29092 && \
                kafka-topics --create --topic tenant-config --partitions 3 --replication-factor 1 --if-not-exists --bootstrap-server kafka0:29092 && \
+               kafka-topics --create --topic device-location --partitions 3 --replication-factor 1 --if-not-exists --bootstrap-server kafka0:29092 && \
+               kafka-topics --create --topic ruuvi-event-ingress --partitions 3 --replication-factor 1 --if-not-exists --bootstrap-server kafka0:29092 && \
                kafka-topics --create --topic service-status --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka0:29092 && \
                kafka-console-producer --bootstrap-server kafka0:29092 -topic ruuvi-gateway-repository < /data/gw-repository-1.json && \
+               kafka-console-producer --bootstrap-server kafka0:29092 -topic ruuvi-event-ingress < /data/ruuvi-event.json && \
+               kafka-console-producer --bootstrap-server kafka0:29092 -topic device-location < /data/device-location.json && \
                kafka-console-producer --bootstrap-server kafka0:29092 -topic tenant-config < /data/tenant-config-1.json'"

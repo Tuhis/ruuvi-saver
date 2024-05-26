@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -11,6 +12,10 @@ import (
 type GatewayRepository interface {
 	GetGatewayOwner(gatewayID string) (string, error)
 	GetInfluxDBConfig(tenantID string) (InfluxDBConfig, error)
+}
+
+type DeviceLocationRepository interface {
+	GetDeviceLocation(tenantId string, deviceId string, timestamp int64) (string, error)
 }
 
 type InfluxDBRepository interface {
@@ -53,14 +58,34 @@ type InfluxDBConfigKafkaMessage struct {
 	UpdatedAt   int    `json:"updated_at"`
 }
 
+type DeviceLocationKafkaMessage struct {
+	TenantID     string `json:"tenant_id"`
+	DeviceID     string `json:"device_id"`
+	LocationName string `json:"location_name"`
+	ValidFrom    int    `json:"valid_from"`
+}
+
+type Location struct {
+	Name      string
+	ValidFrom int
+}
+
+type TenantId string
+
+type DeviceId string
+
 type Config struct {
 	gateways        map[string]Gateway
 	influxDbConfigs map[string]InfluxDBConfig
+	deviceLocations map[TenantId]map[DeviceId][]Location
 	logger          *zap.SugaredLogger
 }
 
+var ErrNoValidLocation = errors.New("no valid location found")
+
 var gwLock = sync.RWMutex{}
 var influxDbLock = sync.RWMutex{}
+var deviceLocationsLock = sync.RWMutex{}
 var wg sync.WaitGroup
 var readerCtx, stopKafkaReaders = context.WithCancel(context.Background())
 
@@ -79,8 +104,14 @@ func New(logger *zap.SugaredLogger) *Config {
 		panic(err)
 	}
 
+	deviceLocations, err := ReadDeviceLocationsFromKafka(logger)
+	if err != nil {
+		panic(err)
+	}
+
 	config.gateways = gateways
 	config.influxDbConfigs = influxDbConfigs
+	config.deviceLocations = deviceLocations
 
 	return config
 }
@@ -105,6 +136,27 @@ func (c *Config) GetInfluxDBConfig(tenantID string) (InfluxDBConfig, error) {
 		return InfluxDBConfig{}, fmt.Errorf("influxdb config not found")
 	}
 	return influxDBCfg, nil
+}
+
+func (c *Config) GetDeviceLocation(tenantId string, deviceId string, timestamp int64) (string, error) {
+	deviceLocationsLock.RLock()
+	defer deviceLocationsLock.RUnlock()
+
+	tenantDevices, ok := c.deviceLocations[TenantId(tenantId)]
+	if !ok {
+		return "", fmt.Errorf("tenant not found")
+	}
+	locations, ok := tenantDevices[DeviceId(deviceId)]
+	if !ok {
+		return "", fmt.Errorf("device not found")
+	}
+	// We know that locations slice is sorted by ValidFrom, so we can just iterate through it
+	for _, location := range locations {
+		if int64(location.ValidFrom) <= timestamp {
+			return location.Name, nil
+		}
+	}
+	return "", ErrNoValidLocation
 }
 
 func (c *Config) Close() {

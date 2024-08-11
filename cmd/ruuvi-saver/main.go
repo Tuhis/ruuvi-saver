@@ -66,9 +66,6 @@ func main() {
 	// Start main consumer
 	ruuviConsumer.Start()
 
-	// Start processing of the messages
-	tsdbWriter.WriteMeasurementsFromKafkaMessageChannel(ctx, ruuviConsumer.MsgChan)
-
 	// Add k8s health and liveliness check endpoints.
 	// TODO: Add more sophisticated checks.
 	http.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +76,14 @@ func main() {
 	})
 
 	fmt.Println("Starting server on port 8088")
-	if err := http.ListenAndServe(":8088", nil); err != nil {
-		panic(err)
-	}
+
+	go func() {
+		if err := http.ListenAndServe(":8088", nil); err != nil {
+			panic(err)
+		}
+	}()
+
+	// Start processing of the messages
+	tsdbWriter.WriteMeasurementsFromKafkaMessageChannel(ctx, ruuviConsumer.MsgChan)
+
 }

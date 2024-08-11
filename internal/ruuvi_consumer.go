@@ -52,6 +52,7 @@ func (r *RuuviConsumer) Start() error {
 		Brokers: []string{kafkaConfig.Brokers},
 		GroupID: "ruuvi-saver", // TODO: Support overriding via env var
 		Topic:   kafkaConfig.RuuviEventTopic,
+		Dialer:  dialer,
 	})
 
 	r.wg.Add(1)

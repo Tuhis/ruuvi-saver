@@ -75,6 +75,7 @@ func ReadGatewaysFromKafka(logger *zap.SugaredLogger) (map[string]Gateway, error
 			Partition:   partition.ID,
 			MaxWait:     1 * time.Second,
 			StartOffset: kafka.FirstOffset, // Start from the beginning
+			Dialer:      dialer,
 		})
 	}
 
@@ -137,6 +138,7 @@ func ReadInfluxDBConfigsFromKafka(logger *zap.SugaredLogger) (map[string]InfluxD
 			Partition:   partition.ID,
 			MaxWait:     1 * time.Second,
 			StartOffset: kafka.FirstOffset, // Start from the beginning
+			Dialer:      dialer,
 		})
 	}
 
@@ -198,6 +200,7 @@ func ReadDeviceLocationsFromKafka(logger *zap.SugaredLogger) (map[TenantId]map[D
 			Partition:   partition.ID,
 			MaxWait:     1 * time.Second,
 			StartOffset: kafka.FirstOffset, // Start from the beginning
+			Dialer:      dialer,
 		})
 	}
 

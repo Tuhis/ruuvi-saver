@@ -190,6 +190,19 @@ func (w *InfluxDBWriter) WriteMeasurementsFromKafkaMessageChannel(ctx context.Co
 				measurementPoints = append(measurementPoints, point)
 
 				point, err = client.NewPoint(
+					"acceleration",
+					tags,
+					map[string]interface{}{
+						"x": *data.Acceleration.X,
+						"y": *data.Acceleration.Y,
+						"z": *data.Acceleration.Z},
+					msg.Time)
+				if err != nil {
+					w.Logger.Error("Failed to create new point", zap.Error(err))
+				}
+				measurementPoints = append(measurementPoints, point)
+
+				point, err = client.NewPoint(
 					"battery",
 					tags,
 					map[string]interface{}{"value": *data.Battery},

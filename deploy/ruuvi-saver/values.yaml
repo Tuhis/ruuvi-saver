@@ -1,0 +1,45 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/tuhis/ruuvi-saver
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart version.
+  tag: ""
+
+imagePullSecrets:
+  - name: "ghcr-imagepullsecret"
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+kafka:
+  broker: iot-kafka-kafka-bootstrap:9092
+  statusTopic: "service-status"
+  ingressTopic: "ruuvi-event-ingress"
+  gatewayRepositoryTopic: "gateway-repository"
+  tenantConfigTopic: "tenant-config"
+  deviceLocationTopic: "device-location"
+  auth:
+    mechanism: "PLAIN" # No authentincation, or "SCRAM-SHA-512" for user/pass
+    username: "user"
+    password: "password"

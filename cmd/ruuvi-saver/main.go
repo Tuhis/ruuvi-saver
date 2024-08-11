@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -66,4 +68,18 @@ func main() {
 
 	// Start processing of the messages
 	tsdbWriter.WriteMeasurementsFromKafkaMessageChannel(ctx, ruuviConsumer.MsgChan)
+
+	// Add k8s health and liveliness check endpoints.
+	// TODO: Add more sophisticated checks.
+	http.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "OK")
+	})
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "OK")
+	})
+
+	fmt.Println("Starting server on port 8088")
+	if err := http.ListenAndServe(":8088", nil); err != nil {
+		panic(err)
+	}
 }

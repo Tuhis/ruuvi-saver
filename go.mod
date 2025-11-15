@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	github.com/Tuhis/edge-receiver v1.5.0
+	github.com/Tuhis/edge-receiver v1.5.1
 	github.com/influxdata/influxdb1-client v0.0.0-20220302092344-a9ab5670611c
 	github.com/joho/godotenv v1.5.1
 	github.com/klauspost/compress v1.15.9 // indirect

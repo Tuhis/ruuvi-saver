@@ -10,6 +10,7 @@ import (
 )
 
 type GatewayRepository interface {
+	GetGatewaysOfAnOwner(ownerId string) ([]Gateway, error)
 	GetGatewayOwner(gatewayID string) (string, error)
 	GetInfluxDBConfig(tenantID string) (InfluxDBConfig, error)
 }
@@ -125,6 +126,19 @@ func (c *Config) GetGatewayOwner(gatewayID string) (string, error) {
 		return "", fmt.Errorf("gateway not found")
 	}
 	return gateway.Owner, nil
+}
+
+func (c *Config) GetGatewaysOfAnOwner(ownerId string) ([]Gateway, error) {
+	gwLock.RLock()
+	defer gwLock.RUnlock()
+
+	var gateways []Gateway
+	for _, gateway := range c.gateways {
+		if gateway.Owner == ownerId {
+			gateways = append(gateways, gateway)
+		}
+	}
+	return gateways, nil
 }
 
 func (c *Config) GetInfluxDBConfig(tenantID string) (InfluxDBConfig, error) {

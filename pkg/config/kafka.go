@@ -294,13 +294,27 @@ func readGatewayRepositoryTopicMessages(reader *kafka.Reader, msgChan chan<- Gat
 			}
 
 			// Unmarshal the message, log it and send it to the channel
-			var gatewayMsg GatewayKafkaMessage
-			if err := json.Unmarshal(msg.Value, &gatewayMsg); err != nil {
-				logger.Errorf("Failed to unmarshal message: %v", err)
+			var gatewayMsgKey GatewayKafkaMessageKey
+			if err := json.Unmarshal(msg.Key, &gatewayMsgKey); err != nil {
+				logger.Errorf("Failed to unmarshal message key: %v", err)
 				continue
 			}
+			var gatewayMsg GatewayKafkaMessage
 
-			logger.Debugf("Received message: %v", gatewayMsg)
+			// Parse value if it has content, otherwise handle as tombstone
+			if len(msg.Value) > 0 {
+				if err := json.Unmarshal(msg.Value, &gatewayMsg); err != nil {
+					logger.Errorf("Failed to unmarshal message value: %v", err)
+					continue
+				}
+			} else {
+				gatewayMsg = GatewayKafkaMessage{
+					ID: gatewayMsgKey.ID,
+				}
+			}
+
+			logger.Debugf("Received message key: %v", gatewayMsgKey)
+			logger.Debugf("Received message value: %v", gatewayMsg)
 			msgChan <- gatewayMsg
 		}
 	}
@@ -378,23 +392,29 @@ func readDeviceLocationTopicMessages(reader *kafka.Reader, msgChan chan<- Device
 func updateGateways(gateways map[string]Gateway, msgChan <-chan GatewayKafkaMessage) {
 	for msg := range msgChan {
 		gwLock.Lock()
-		// Check if the gateway is already in the map and update it if OwnerSince is newer. Otherwise add it to the map.
-		gw, ok := gateways[msg.ID]
-		if ok {
+		// Check if the gateway is already in the map
+		gw, gwExists := gateways[msg.ID]
+
+		// Check if this is tombstone event
+		if msg.Owner == "" && msg.OwnerSince == 0 {
+			// If the gateway is already in the map, delete it
+			if gwExists {
+				delete(gateways, msg.ID)
+			}
+
+			gwLock.Unlock()
+
+			continue
+		}
+		// Update Gateway if OwnerSince is newer. Otherwise add it to the map.
+		if gwExists {
 			if msg.OwnerSince > gw.OwnerSince {
-				gateways[msg.ID] = Gateway{
-					ID:         msg.ID,
-					Owner:      msg.Owner,
-					OwnerSince: msg.OwnerSince,
-				}
+				gateways[msg.ID] = Gateway(msg)
 			}
 		} else {
-			gateways[msg.ID] = Gateway{
-				ID:         msg.ID,
-				Owner:      msg.Owner,
-				OwnerSince: msg.OwnerSince,
-			}
+			gateways[msg.ID] = Gateway(msg)
 		}
+
 		gwLock.Unlock()
 	}
 }

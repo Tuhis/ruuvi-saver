@@ -38,6 +38,10 @@ type GatewayKafkaMessage struct {
 	OwnerSince int    `json:"owner_since"`
 }
 
+type GatewayKafkaMessageKey struct {
+	ID string `json:"id"`
+}
+
 type InfluxDBConfig struct {
 	Host        string
 	AccessToken string

@@ -120,6 +120,7 @@ func New(logger *zap.SugaredLogger) *Config {
 	return config
 }
 
+// GetGatewayOwner returns the owner ID of the gateway with the given ID.
 func (c *Config) GetGatewayOwner(gatewayID string) (string, error) {
 	gwLock.RLock()
 	defer gwLock.RUnlock()
@@ -131,6 +132,7 @@ func (c *Config) GetGatewayOwner(gatewayID string) (string, error) {
 	return gateway.Owner, nil
 }
 
+// GetGateway retrieves the Gateway by its ID.
 func (c *Config) GetGateway(gatewayID string) (Gateway, error) {
 	gwLock.RLock()
 	defer gwLock.RUnlock()
@@ -142,6 +144,7 @@ func (c *Config) GetGateway(gatewayID string) (Gateway, error) {
 	return gateway, nil
 }
 
+// GetGatewaysOfAnOwner returns all gateways owned by the given owner ID.
 func (c *Config) GetGatewaysOfAnOwner(ownerId string) ([]Gateway, error) {
 	gwLock.RLock()
 	defer gwLock.RUnlock()

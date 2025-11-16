@@ -10,6 +10,8 @@ import (
 )
 
 var ErrGatewayNotFound = errors.New("gateway not found")
+var ErrTenantNotFound = errors.New("tenant not found")
+var ErrDeviceNotFound = errors.New("device not found")
 
 type GatewayRepository interface {
 	GetGatewaysOfAnOwner(ownerId string) ([]Gateway, error)
@@ -179,11 +181,11 @@ func (c *Config) GetDeviceLocation(tenantId string, deviceId string, timestamp i
 
 	tenantDevices, ok := c.deviceLocations[TenantId(tenantId)]
 	if !ok {
-		return "", fmt.Errorf("tenant not found")
+		return "", ErrTenantNotFound
 	}
 	locations, ok := tenantDevices[DeviceId(deviceId)]
 	if !ok {
-		return "", fmt.Errorf("device not found")
+		return "", ErrDeviceNotFound
 	}
 	// We know that locations slice is sorted by ValidFrom, so we can just iterate through it
 	for _, location := range locations {

@@ -9,9 +9,12 @@ import (
 	"go.uber.org/zap"
 )
 
+var ErrGatewayNotFound = errors.New("gateway not found")
+
 type GatewayRepository interface {
 	GetGatewaysOfAnOwner(ownerId string) ([]Gateway, error)
 	GetGatewayOwner(gatewayID string) (string, error)
+	GetGateway(gatewayID string) (Gateway, error)
 	GetInfluxDBConfig(tenantID string) (InfluxDBConfig, error)
 }
 
@@ -123,9 +126,20 @@ func (c *Config) GetGatewayOwner(gatewayID string) (string, error) {
 
 	gateway, ok := c.gateways[gatewayID]
 	if !ok {
-		return "", fmt.Errorf("gateway not found")
+		return "", ErrGatewayNotFound
 	}
 	return gateway.Owner, nil
+}
+
+func (c *Config) GetGateway(gatewayID string) (Gateway, error) {
+	gwLock.RLock()
+	defer gwLock.RUnlock()
+
+	gateway, ok := c.gateways[gatewayID]
+	if !ok {
+		return Gateway{}, ErrGatewayNotFound
+	}
+	return gateway, nil
 }
 
 func (c *Config) GetGatewaysOfAnOwner(ownerId string) ([]Gateway, error) {
